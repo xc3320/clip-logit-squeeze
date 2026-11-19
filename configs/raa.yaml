@@ -1,0 +1,32 @@
+# RAA 实验配置
+# 事实：本机 RTX 3060 12288MB / 驱动 572.83 / Python 3.13.14（均已实测）
+# 推断：超参取值为常用设定，需按真实数据调优，非保证值
+
+backbone: "ViT-B-16-quickgelu"   # openai 权重需 QuickGELU 激活；用 ViT-B-16 会 GELU/QuickGELU 不匹配致精度偏差
+pretrained: "openai"
+n_ctx: 16               # CoOp 上下文 token 数（常用 4/16）
+lr: 0.002               # SGD 学习率（CoOp 常用量级）
+epochs: 100             # 训练轮数（骨架值，实际按过拟合情况调整）
+log_every: 50
+fp16: false              # 统一fp32：open_clip权重为fp32，混用fp16会报 Half/Float dtype冲突；DTD规模小显存充足无需fp16
+
+# KgCoOp 对照基线：固定标量锚定强度（论文报告 8.0 最优）
+kg_lam: 8.0
+
+# RAA 逐类自适应锚定：λ_i = center + spread * (rel_i - mean_rel)
+# rel_i = 该类 support 样本的零样本分类准确率（mode=acc，区分度大）
+# 逐类权重围绕 center 波动、全类均值恰为 center → 与固定 λ=8 的 KgCoOp 公平对照
+rel_mode: "acc"         # acc=零样本准确率(默认) / conf=余弦相似度 / margin=连续竞争边距
+raa_spread: 6.0         # 逐类权重波动幅度(骨架值: rel差1.0则λ差6.0,需按真实数据调)
+margin_scale: 10.0      # margin 模式 sigmoid 温度倒数；仅 raa_margin* 变体使用
+
+# 探索性变体（由 train.py --method 选择，不改本配置）：
+#   raa            : acc 可靠性，可靠类强锚定（原始 RAA）
+#   raa_rev        : acc 可靠性，不可靠类强锚定（反向假设）
+#   raa_margin     : 连续边距可靠性，可靠类强锚定
+#   raa_margin_rev : 连续边距可靠性，不可靠类强锚定
+#   raa_anneal     : acc 可靠性，自适应偏差从 1 衰减到 0（末轮退化为 KgCoOp）
+#   raa_margin_anneal : 连续边距 + 衰减
+# 所有变体均保持 mean(λ_i)=kg_lam，与 KgCoOp 公平对照。
+
+vram_limit_mb: 12288    # 硬上限，实测显存超过即判失败

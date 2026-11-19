@@ -1,0 +1,9 @@
+torch>=1.13
+open_clip_torch>=2.20
+numpy
+pandas
+scipy
+scikit-learn
+matplotlib
+pyyaml
+Pillow

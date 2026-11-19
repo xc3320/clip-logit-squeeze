@@ -1,0 +1,18 @@
+# RN50 骨干对照实验配置（M5 跨骨干鲁棒性验证）
+# 与 raa.yaml 唯一区别：backbone 换成 ResNet-50，其余超参与 ViT-B/16 完全一致，保证可比。
+
+backbone: "RN50"            # ResNet-50 (OpenAI CLIP 权重，QuickGELU)，验证尺度校准方向是否随骨干反转
+pretrained: "weights/openclip_RN50_openai.pt"   # 由 OpenAI 官方 RN50.pt 转换的 open_clip 权重（HF 源 502，改官方源）
+n_ctx: 16
+lr: 0.002
+epochs: 100
+log_every: 50
+fp16: false                 # 统一 fp32，避免 Half/Float dtype 冲突
+
+kg_lam: 8.0
+
+rel_mode: "acc"
+raa_spread: 6.0
+margin_scale: 10.0
+
+vram_limit_mb: 12288

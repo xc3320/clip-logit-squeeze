@@ -1,0 +1,31 @@
+# Data and model weights (large binaries)
+data/
+weights/
+*.pt
+*.pth
+*.ckpt
+*.tar.gz
+*.tgz
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Results (reproducible, but keep repo small; uncomment to track)
+results/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+submission/
+docs/*.docx
+docs/*.pdf
